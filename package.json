@@ -1,0 +1,26 @@
+{
+  "name": "img-recog",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "deploy": "bin/deploy.js",
+    "clean": "bin/clean.js",
+    "deploy-dev": "npm run deploy --task=deploy --package=ieam-dev --env=dev",
+    "deploy-stage": "npm run deploy --task=deploy --package=ieam-stage --env=dev",
+    "switch-account": "bin/switch-account.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@tensorflow-models/mobilenet": "^2.1.0",
+    "@tensorflow/tfjs": "^3.6.0",
+    "@tensorflow/tfjs-node": "^3.3.0",
+    "node-webcam": "^0.8.0"
+  },
+  "devDependencies": {
+    "dotenv": "^9.0.2",
+    "jsonfile": "^6.1.0"
+  }
+}
