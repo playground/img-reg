@@ -90,12 +90,15 @@ const opts = {
 
 };
 
+let model;
+let webcam;
 const classify = async (modelPath) => {
-  const modelInfo = await tfnode.node.getMetaGraphsFromSavedModel(modelPath);
-  console.dir(modelInfo);
-  console.dir(modelInfo[0].signatureDefs.serving_default);
-const model = await loadModel(modelPath);
-  const webcam = NodeWebcam.create( opts );
+  // Get MetaGrapth
+  // const modelInfo = await tfnode.node.getMetaGraphsFromSavedModel(modelPath);
+  // console.dir(modelInfo);
+  // console.dir(modelInfo[0].signatureDefs.serving_default);
+  model = await loadModel(modelPath);
+  webcam = NodeWebcam.create( opts );
   
   // webcam.getLastShot( function(err, shot) {
   //   webcam.getBase64(shot, function(err, decodedImage) {
@@ -104,42 +107,124 @@ const model = await loadModel(modelPath);
   //   });
   // });
 
+  capture();
+}
+
+const sleep = (ms) => {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+let previousImage = null;
+const capture = () => {
   webcam.capture( 'my_picture', async ( err, data ) => {
     if(!err) {
+      if(previousImage == data) {
+        console.log('do nothing');
+        await sleep(2000);
+        capture();
+        return;
+      }
+      previousImage = data;
       // const image = fs.readFileSync('my_picture.jpg');
       // const decodedImage = tfnode.node.decodeImage(new Uint8Array(image), 3);
       const decodedImage = tfnode.node.decodeImage(new Uint8Array(data), 3);
       const input = decodedImage.expandDims(0);
-      // let input = tfnode.zeros([1, 224, 224, 3]);
-      // input[0] = decodedImage;
+
+      const startTime = tfnode.util.now();
       let outputTensor = await model.predict({input_tensor: input});
       const scores = await outputTensor['detection_scores'].arraySync();
       const boxes = await outputTensor['detection_boxes'].arraySync();
       const classes = await outputTensor['detection_classes'].arraySync();
       const num = await outputTensor['num_detections'].arraySync();
+      const endTime = tfnode.util.now();
       outputTensor['detection_scores'].dispose();
       outputTensor['detection_boxes'].dispose();
       outputTensor['detection_classes'].dispose();
       outputTensor['num_detections'].dispose();
-      const detectedBoxes = [];
-      const detectedNames = [];
-      const detectedScores = [];
+      
+      let predictions = [];
+      const elapsedTime = endTime - startTime;
       for (let i = 0; i < scores[0].length; i++) {
-        if (scores[0][i] > 0.3) {
-          detectedBoxes.push(boxes[0][i]);
-          detectedNames.push(labels[classes[0][i]]);
-          detectedScores.push(scores[0][i]);
+        if (scores[0][i] > 0.5) {
+          predictions.push({
+            detectedBox: boxes[0][i],
+            detectedClass: labels[classes[0][i]],
+            detectedScore: scores[0][i]
+          });
         }
       }
-      console.log('predictions:', detectedBoxes, detectedNames, detectedScores);
-        // webcam.getBase64(0, (err, data) => {
-      //   const predictions = model.predict(data);
-      //   console.log('predictions:', predictions);  
-      // })
+      console.log('predictions:', predictions.length, predictions[0]);
+      console.log('time took: ', elapsedTime);
+      console.log('build html...');
+      await buildHtml(predictions, elapsedTime);
+
+      if(previousImage == data) {
+        await sleep(2000);
+        capture();
+        return;
+      }
     }  
+  });  
+
+};
+
+const buildHtml = async(predictions, time) => {
+  let html = `<!DOCTYPE html>
+  <meta charset="utf-8">
+  <title>TFJS Firebase example</title>
+  <div>
+    <div id="time"></div>
+    <br />
+    <br />
+    <canvas id="canvas"></canvas>
+    <br />
+  </div>
+  <script>
+    const context = document.getElementById('canvas').getContext('2d');
+    const canvas = document.getElementById('canvas');
+    const timeDiv = document.getElementById('time');
+    timeDiv.innerHTML = 'Inference time: ${time}';
+
+    let img = new Image();
+    img.addEventListener('load', () => {
+      const { naturalWidth: width, naturalHeight: height } = img;
+      console.log('loaded', width, height)
+      canvas.width = width;
+      canvas.height = height;
+      canvas.width = width;
+      canvas.height = height;
+      context.drawImage(img, 0, 0, width, height);
+    `;
+    
+    for(let i=0; i<predictions.length; i++) {
+      const box = predictions[i].detectedBox;
+      html += `
+        context.fillStyle = 'rgba(255,255,255,0.2)';
+        context.strokeStyle = 'blue';
+        context.fillRect(${box[1]} * width, ${box[0]} * height, width * (${box[3] - box[1]}), this
+        .height * (${box[2] - box[0]}));
+      context.font = '15px Arial';
+      context.fillStyle = 'white';
+      context.fillText('${predictions[i].detectedClass}: ${predictions[i].detectedScore}', ${box[1]} * width, ${box[0]} * height, ${box[0]} * height);
+      context.lineWidth = 2;
+      context.strokeRect(${box[1]} * width, ${box[0]} * height, width * (${box[3] - box[1]}), height * (${box[2] - box[0]}));      
+      `;
+    }
+  html += `   
   });
-  
+  img.src = 'my_picture.jpg';
+
+  setTimeout(() => {
+    window.location.reload();
+  }, 5000)
+  </script>`;
+
+  fs.writeFile('my_picture.html', html, (err) => {
+    if(err) return console.log(err);
+    console.log('my_picture.html created successfully.');
+  })
 }
+
 
 console.log(process.argv[2])    
 classify(process.argv[2])
