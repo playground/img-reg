@@ -1,10 +1,14 @@
 // const tf = require('@tensorflow/tfjs');
 const tfnode = require('@tensorflow/tfjs-node');
-const labels = require('./inference_graph/saved_model/assets/labels.json');
 // const mobilenet = require('@tensorflow-models/mobilenet');
 const fs = require('fs');
 const NodeWebcam = require('node-webcam');
 const Jimp = require('Jimp');
+
+const labelUrl = process.argv[3] ?? './inference_graph/saved_model/assets/labels.json';
+const labels = require(labelUrl);
+
+const SLEEP = 10000;
 
 const loadModel = async (modelPath) => {
   // const handler = tfnode.io.fileSystem(`./${modelPath}`);
@@ -120,7 +124,7 @@ const capture = () => {
     if(!err) {
       if(previousImage == data) {
         console.log('do nothing');
-        await sleep(2000);
+        await sleep(SLEEP);
         capture();
         return;
       }
@@ -159,7 +163,7 @@ const capture = () => {
       await buildHtml(predictions, elapsedTime);
 
       if(previousImage == data) {
-        await sleep(2000);
+        await sleep(SLEEP);
         capture();
         return;
       }
@@ -200,14 +204,14 @@ const buildHtml = async(predictions, time) => {
       const box = predictions[i].detectedBox;
       html += `
         context.fillStyle = 'rgba(255,255,255,0.2)';
-        context.strokeStyle = 'blue';
-        context.fillRect(${box[1]} * width, ${box[0]} * height, width * (${box[3] - box[1]}), this
-        .height * (${box[2] - box[0]}));
-      context.font = '15px Arial';
-      context.fillStyle = 'white';
-      context.fillText('${predictions[i].detectedClass}: ${predictions[i].detectedScore}', ${box[1]} * width, ${box[0]} * height, ${box[0]} * height);
-      context.lineWidth = 2;
-      context.strokeRect(${box[1]} * width, ${box[0]} * height, width * (${box[3] - box[1]}), height * (${box[2] - box[0]}));      
+        context.strokeStyle = 'yellow';
+        context.fillRect(${box[1]} * width, ${box[0]} * height, width * ${parseFloat(box[3] - box[1]).toFixed(3)},
+        height * ${parseFloat(box[2] - box[0]).toFixed(3)});
+        context.font = '15px Arial';
+        context.fillStyle = 'white';
+        context.fillText('${predictions[i].detectedClass}: ${parseFloat(predictions[i].detectedScore).toFixed(3)}', ${box[1]} * width, ${box[0]} * height, ${box[0]} * height);
+        context.lineWidth = 2;
+        context.strokeRect(${box[1]} * width, ${box[0]} * height, width * ${parseFloat(box[3] - box[1]).toFixed(3)}, height * ${parseFloat(box[2] - box[0]).toFixed(3)});      
       `;
     }
   html += `   
@@ -216,7 +220,7 @@ const buildHtml = async(predictions, time) => {
 
   setTimeout(() => {
     window.location.reload();
-  }, 5000)
+  }, 10000)
   </script>`;
 
   fs.writeFile('my_picture.html', html, (err) => {
