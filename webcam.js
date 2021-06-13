@@ -5,8 +5,7 @@ const fs = require('fs');
 const NodeWebcam = require('node-webcam');
 const Jimp = require('Jimp');
 
-const labelUrl = process.argv[3] ?? './inference_graph/saved_model/assets/labels.json';
-const labels = require(labelUrl);
+let labels;
 
 const SLEEP = 10000;
 
@@ -15,6 +14,7 @@ const loadModel = async (modelPath) => {
   // const model = await tfnode.loadLayersModel(handler);
   // const model = await tfnode.loadLayersModel(modelPath);
   const model = await tfnode.node.loadSavedModel(modelPath, ['serve'], 'serving_default');
+  labels = require(`${modelPath}/assets/labels.json`);
   // const model = await tfnode.loadGraphModel(modelPath);
   return model;
 }
@@ -172,14 +172,37 @@ const capture = () => {
 
 };
 
-const buildHtml = async(predictions, time) => {
+const buildHtml = async(predictions, time, image) => {
   let html = `<!DOCTYPE html>
   <meta charset="utf-8">
-  <title>TFJS Firebase example</title>
+  <title>TFJS IEAM Demo</title>
+  <style>
+    table {
+      border-collapse: collapse;
+      border-spacing: 0;
+      float: left;
+      max-width: 700px;
+      border: 1px solid #ddd;
+      margin-right: 20px;
+      margin-bottom: 20px;
+      table-layout: fixed;
+    }
+
+    th, td {
+        text-align: left;
+        padding: 8px;
+        width: 100%;
+    }
+
+    tr:nth-child(even){background-color: #f2f2f2}
+    tr th:nth-child(n+2){text-align: right}
+    tr td:nth-child(n+2){text-align: right}
+  </style>
   <div>
     <div id="time"></div>
     <br />
     <br />
+    <div id="table"></div>
     <canvas id="canvas"></canvas>
     <br />
   </div>
@@ -187,7 +210,28 @@ const buildHtml = async(predictions, time) => {
     const context = document.getElementById('canvas').getContext('2d');
     const canvas = document.getElementById('canvas');
     const timeDiv = document.getElementById('time');
-    timeDiv.innerHTML = 'Inference time: ${time}';
+    let tableDiv = document.getElementById('table');
+    timeDiv.innerHTML = 'Inference time: ${time.toFixed(2)}';
+
+    let table = document.createElement('table');
+    let row = document.createElement('tr');
+    let cell = document.createElement('th');
+    let cellText = document.createTextNode('Label');
+    cell.appendChild(cellText);
+    row.appendChild(cell)
+    cell = document.createElement('th');
+    cellText = document.createTextNode('Confidence');
+    cell.appendChild(cellText);
+    row.appendChild(cell)
+    cell = document.createElement('th');
+    cellText = document.createTextNode('Min Pos');
+    cell.appendChild(cellText);
+    row.appendChild(cell)
+    cell = document.createElement('th');
+    cellText = document.createTextNode('Max Pos');
+    cell.appendChild(cellText);
+    row.appendChild(cell)
+    table.appendChild(row);
 
     let img = new Image();
     img.addEventListener('load', () => {
@@ -197,12 +241,32 @@ const buildHtml = async(predictions, time) => {
       canvas.height = height;
       canvas.width = width;
       canvas.height = height;
-      context.drawImage(img, 0, 0, width, height);
+      context.drawImage(img, 0, 0, width, height);      
     `;
     
+
     for(let i=0; i<predictions.length; i++) {
       const box = predictions[i].detectedBox;
       html += `
+        row = document.createElement('tr');
+        cell = document.createElement('td');
+        cellText = document.createTextNode('${predictions[i].detectedClass}');
+        cell.appendChild(cellText);
+        row.appendChild(cell)
+        cell = document.createElement('td');
+        cellText = document.createTextNode('${predictions[i].detectedScore}');
+        cell.appendChild(cellText);
+        row.appendChild(cell);
+        cell = document.createElement('td');
+        cellText = document.createTextNode('(${predictions[i].detectedBox[0]},${predictions[i].detectedBox[1]})');
+        cell.appendChild(cellText);
+        row.appendChild(cell);
+        cell = document.createElement('td');
+        cellText = document.createTextNode('(${predictions[i].detectedBox[2]},${predictions[i].detectedBox[3]})');
+        cell.appendChild(cellText);
+        row.appendChild(cell);
+        table.appendChild(row);
+
         context.fillStyle = 'rgba(255,255,255,0.2)';
         context.strokeStyle = 'yellow';
         context.fillRect(${box[1]} * width, ${box[0]} * height, width * ${parseFloat(box[3] - box[1]).toFixed(3)},
@@ -214,7 +278,9 @@ const buildHtml = async(predictions, time) => {
         context.strokeRect(${box[1]} * width, ${box[0]} * height, width * ${parseFloat(box[3] - box[1]).toFixed(3)}, height * ${parseFloat(box[2] - box[0]).toFixed(3)});      
       `;
     }
-  html += `   
+  html += `
+  tableDiv.appendChild(table);
+   
   });
   img.src = 'my_picture.jpg';
 

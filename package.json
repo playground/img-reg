@@ -18,8 +18,10 @@
     "@tensorflow/tfjs": "^3.6.0",
     "@tensorflow/tfjs-node": "^3.3.0",
     "cli-select": "^1.1.2",
+    "inquirer": "^8.1.0",
     "jimp": "^0.16.1",
-    "node-webcam": "^0.8.0"
+    "node-webcam": "^0.8.0",
+    "select-prompt": "^0.3.2"
   },
   "devDependencies": {
     "dotenv": "^9.0.2",

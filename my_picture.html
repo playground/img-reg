@@ -1,10 +1,33 @@
 <!DOCTYPE html>
   <meta charset="utf-8">
-  <title>TFJS Firebase example</title>
+  <title>TFJS IEAM Demo</title>
+  <style>
+    table {
+      border-collapse: collapse;
+      border-spacing: 0;
+      float: left;
+      max-width: 700px;
+      border: 1px solid #ddd;
+      margin-right: 20px;
+      margin-bottom: 20px;
+      table-layout: fixed;
+    }
+
+    th, td {
+        text-align: left;
+        padding: 8px;
+        width: 100%;
+    }
+
+    tr:nth-child(even){background-color: #f2f2f2}
+    tr th:nth-child(n+2){text-align: right}
+    tr td:nth-child(n+2){text-align: right}
+  </style>
   <div>
     <div id="time"></div>
     <br />
     <br />
+    <div id="table"></div>
     <canvas id="canvas"></canvas>
     <br />
   </div>
@@ -12,7 +35,28 @@
     const context = document.getElementById('canvas').getContext('2d');
     const canvas = document.getElementById('canvas');
     const timeDiv = document.getElementById('time');
-    timeDiv.innerHTML = 'Inference time: 215.64771699905396';
+    let tableDiv = document.getElementById('table');
+    timeDiv.innerHTML = 'Inference time: 271.57';
+
+    let table = document.createElement('table');
+    let row = document.createElement('tr');
+    let cell = document.createElement('th');
+    let cellText = document.createTextNode('Label');
+    cell.appendChild(cellText);
+    row.appendChild(cell)
+    cell = document.createElement('th');
+    cellText = document.createTextNode('Confidence');
+    cell.appendChild(cellText);
+    row.appendChild(cell)
+    cell = document.createElement('th');
+    cellText = document.createTextNode('Min Pos');
+    cell.appendChild(cellText);
+    row.appendChild(cell)
+    cell = document.createElement('th');
+    cellText = document.createTextNode('Max Pos');
+    cell.appendChild(cellText);
+    row.appendChild(cell)
+    table.appendChild(row);
 
     let img = new Image();
     img.addEventListener('load', () => {
@@ -22,80 +66,128 @@
       canvas.height = height;
       canvas.width = width;
       canvas.height = height;
-      context.drawImage(img, 0, 0, width, height);
+      context.drawImage(img, 0, 0, width, height);      
     
+        row = document.createElement('tr');
+        cell = document.createElement('td');
+        cellText = document.createTextNode('hardhat');
+        cell.appendChild(cellText);
+        row.appendChild(cell)
+        cell = document.createElement('td');
+        cellText = document.createTextNode('0.9905259609222412');
+        cell.appendChild(cellText);
+        row.appendChild(cell);
+        cell = document.createElement('td');
+        cellText = document.createTextNode('(0.038973014801740646,0.3828035891056061)');
+        cell.appendChild(cellText);
+        row.appendChild(cell);
+        cell = document.createElement('td');
+        cellText = document.createTextNode('(0.618864119052887,0.6702319383621216)');
+        cell.appendChild(cellText);
+        row.appendChild(cell);
+        table.appendChild(row);
+
         context.fillStyle = 'rgba(255,255,255,0.2)';
         context.strokeStyle = 'yellow';
-        context.fillRect(0.215 * width, 0.009 * height, width * 0.245,
-        height * 0.990);
+        context.fillRect(0.3828035891056061 * width, 0.038973014801740646 * height, width * 0.287,
+        height * 0.580);
         context.font = '15px Arial';
         context.fillStyle = 'white';
-        context.fillText('person: 0.994', 0.215 * width, 0.009 * height, 0.009 * height);
+        context.fillText('hardhat: 0.991', 0.3828035891056061 * width, 0.038973014801740646 * height, 0.038973014801740646 * height);
         context.lineWidth = 2;
-        context.strokeRect(0.215 * width, 0.009 * height, width * 0.245, height * 0.990);      
+        context.strokeRect(0.3828035891056061 * width, 0.038973014801740646 * height, width * 0.287, height * 0.580);      
       
+        row = document.createElement('tr');
+        cell = document.createElement('td');
+        cellText = document.createTextNode('vest');
+        cell.appendChild(cellText);
+        row.appendChild(cell)
+        cell = document.createElement('td');
+        cellText = document.createTextNode('0.9344605207443237');
+        cell.appendChild(cellText);
+        row.appendChild(cell);
+        cell = document.createElement('td');
+        cellText = document.createTextNode('(0.6493189930915833,0.21707725524902344)');
+        cell.appendChild(cellText);
+        row.appendChild(cell);
+        cell = document.createElement('td');
+        cellText = document.createTextNode('(0.9831750988960266,0.7268143892288208)');
+        cell.appendChild(cellText);
+        row.appendChild(cell);
+        table.appendChild(row);
+
         context.fillStyle = 'rgba(255,255,255,0.2)';
         context.strokeStyle = 'yellow';
-        context.fillRect(0.456 * width, 0.422 * height, width * 0.123,
-        height * 0.282);
+        context.fillRect(0.21707725524902344 * width, 0.6493189930915833 * height, width * 0.510,
+        height * 0.334);
         context.font = '15px Arial';
         context.fillStyle = 'white';
-        context.fillText('head: 0.986', 0.456 * width, 0.422 * height, 0.422 * height);
+        context.fillText('vest: 0.934', 0.21707725524902344 * width, 0.6493189930915833 * height, 0.6493189930915833 * height);
         context.lineWidth = 2;
-        context.strokeRect(0.456 * width, 0.422 * height, width * 0.123, height * 0.282);      
+        context.strokeRect(0.21707725524902344 * width, 0.6493189930915833 * height, width * 0.510, height * 0.334);      
       
+        row = document.createElement('tr');
+        cell = document.createElement('td');
+        cellText = document.createTextNode('person');
+        cell.appendChild(cellText);
+        row.appendChild(cell)
+        cell = document.createElement('td');
+        cellText = document.createTextNode('0.8924538493156433');
+        cell.appendChild(cellText);
+        row.appendChild(cell);
+        cell = document.createElement('td');
+        cellText = document.createTextNode('(0.07025231420993805,0.17084366083145142)');
+        cell.appendChild(cellText);
+        row.appendChild(cell);
+        cell = document.createElement('td');
+        cellText = document.createTextNode('(0.9786472320556641,0.824862003326416)');
+        cell.appendChild(cellText);
+        row.appendChild(cell);
+        table.appendChild(row);
+
         context.fillStyle = 'rgba(255,255,255,0.2)';
         context.strokeStyle = 'yellow';
-        context.fillRect(0.470 * width, 0.416 * height, width * 0.191,
-        height * 0.581);
+        context.fillRect(0.17084366083145142 * width, 0.07025231420993805 * height, width * 0.654,
+        height * 0.908);
         context.font = '15px Arial';
         context.fillStyle = 'white';
-        context.fillText('person: 0.963', 0.470 * width, 0.416 * height, 0.416 * height);
+        context.fillText('person: 0.892', 0.17084366083145142 * width, 0.07025231420993805 * height, 0.07025231420993805 * height);
         context.lineWidth = 2;
-        context.strokeRect(0.470 * width, 0.416 * height, width * 0.191, height * 0.581);      
+        context.strokeRect(0.17084366083145142 * width, 0.07025231420993805 * height, width * 0.654, height * 0.908);      
       
+        row = document.createElement('tr');
+        cell = document.createElement('td');
+        cellText = document.createTextNode('vest');
+        cell.appendChild(cellText);
+        row.appendChild(cell)
+        cell = document.createElement('td');
+        cellText = document.createTextNode('0.7467849254608154');
+        cell.appendChild(cellText);
+        row.appendChild(cell);
+        cell = document.createElement('td');
+        cellText = document.createTextNode('(0.6284204125404358,0.42203426361083984)');
+        cell.appendChild(cellText);
+        row.appendChild(cell);
+        cell = document.createElement('td');
+        cellText = document.createTextNode('(0.9707986116409302,0.6744117736816406)');
+        cell.appendChild(cellText);
+        row.appendChild(cell);
+        table.appendChild(row);
+
         context.fillStyle = 'rgba(255,255,255,0.2)';
         context.strokeStyle = 'yellow';
-        context.fillRect(0.354 * width, 0.040 * height, width * 0.110,
-        height * 0.249);
+        context.fillRect(0.42203426361083984 * width, 0.6284204125404358 * height, width * 0.252,
+        height * 0.342);
         context.font = '15px Arial';
         context.fillStyle = 'white';
-        context.fillText('head: 0.959', 0.354 * width, 0.040 * height, 0.040 * height);
+        context.fillText('vest: 0.747', 0.42203426361083984 * width, 0.6284204125404358 * height, 0.6284204125404358 * height);
         context.lineWidth = 2;
-        context.strokeRect(0.354 * width, 0.040 * height, width * 0.110, height * 0.249);      
+        context.strokeRect(0.42203426361083984 * width, 0.6284204125404358 * height, width * 0.252, height * 0.342);      
       
-        context.fillStyle = 'rgba(255,255,255,0.2)';
-        context.strokeStyle = 'yellow';
-        context.fillRect(0.776 * width, 0.247 * height, width * 0.215,
-        height * 0.753);
-        context.font = '15px Arial';
-        context.fillStyle = 'white';
-        context.fillText('head: 0.910', 0.776 * width, 0.247 * height, 0.247 * height);
-        context.lineWidth = 2;
-        context.strokeRect(0.776 * width, 0.247 * height, width * 0.215, height * 0.753);      
-      
-        context.fillStyle = 'rgba(255,255,255,0.2)';
-        context.strokeStyle = 'yellow';
-        context.fillRect(0.776 * width, 0.269 * height, width * 0.216,
-        height * 0.731);
-        context.font = '15px Arial';
-        context.fillStyle = 'white';
-        context.fillText('person: 0.817', 0.776 * width, 0.269 * height, 0.269 * height);
-        context.lineWidth = 2;
-        context.strokeRect(0.776 * width, 0.269 * height, width * 0.216, height * 0.731);      
-      
-        context.fillStyle = 'rgba(255,255,255,0.2)';
-        context.strokeStyle = 'yellow';
-        context.fillRect(0.355 * width, 0.487 * height, width * 0.035,
-        height * 0.177);
-        context.font = '15px Arial';
-        context.fillStyle = 'white';
-        context.fillText('badge: 0.664', 0.355 * width, 0.487 * height, 0.487 * height);
-        context.lineWidth = 2;
-        context.strokeRect(0.355 * width, 0.487 * height, width * 0.035, height * 0.177);      
-         
+  tableDiv.appendChild(table);
+   
   });
-  img.src = 'badge-coat-person.png';
+  img.src = 'my_picture.jpg';
 
   setTimeout(() => {
     window.location.reload();
